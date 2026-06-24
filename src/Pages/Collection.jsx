@@ -10,7 +10,8 @@ const Collection = () => {
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
-  const [sortType, setSortType] = useState('relevant')
+  const [sortType, setSortType] = useState('relevant');
+  const [visibleProducts, setVisibleProducts] = useState(12);
 
   // for category filter
   const toggleCategory =(e) =>{
@@ -76,6 +77,10 @@ const Collection = () => {
   sortProducts();
  },[sortType])
 
+ useEffect(() => {
+  setVisibleProducts(12);
+ }, [category, setCategory, search, showSearch])
+
   return (
     <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t border-gray-200'>
       {/* filters options */}
@@ -138,11 +143,24 @@ const Collection = () => {
 
                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
                {
-                filterProducts.map((item,index)=> (
+                filterProducts.slice(0,visibleProducts).map((item,index)=> (
                   <ProductItem key={index} id={item._id} name={item.name} image={item.image} price={item.price} />
                 ))
                }
                </div>
+
+                  {
+  visibleProducts < filterProducts.length && (
+    <div className="flex justify-center mt-10">
+      <button
+        onClick={() => setVisibleProducts(prev => prev + 12)}
+        className="px-6 py-3 bg-black text-white active:bg-gray-800 cursor-pointer"
+      >
+        Load More
+      </button>
+    </div>
+  )
+}
 
             </div>
 
