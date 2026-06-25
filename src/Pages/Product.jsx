@@ -4,6 +4,7 @@ import { ShopContext } from '../context/shopContext'
 import { products } from '../assets/assets'
 import { MdOutlineStar } from "react-icons/md";
 import RelatedProducts from '../components/RelatedProducts';
+import ReviewCard from '../components/ReviewCard';
 
 const Product = () => {
   const { productId } = useParams()
@@ -11,6 +12,7 @@ const Product = () => {
   const [productData, setProductData] = useState(false)
   const [image, setImage] = useState('')
   const [size, setZize] = useState('')
+  const [activeTab, setActiveTab] = useState('description')
 
   const fetchProductData = async () => {
 
@@ -27,6 +29,39 @@ const Product = () => {
   useEffect(() => {
     fetchProductData()
   }, [productId])
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  },[productId])
+
+  const reviews = [
+  {
+    name: "Sarah M.",
+    title: "Absolutely Love My New Dress!",
+    comment: "The quality is fantastic and fits perfectly. Shipping was fast too.",
+    rating: 3,
+    date: "July 28, 2025",
+    image: "https://i.pravatar.cc/50?img=1"
+  },
+
+  {
+    name: "David P.",
+    title: "Great Quality Product",
+    comment: "Very comfortable and premium quality. Worth the money.",
+    rating: 4,
+    date: "July 25, 2025",
+    image: "https://i.pravatar.cc/50?img=8"
+  },
+
+  {
+    name: "Jessica L.",
+    title: "Highly Recommended",
+    comment: "Exactly as shown in the pictures. I would definitely buy again.",
+    rating: 5,
+    date: "July 22, 2025",
+    image: "https://i.pravatar.cc/50?img=5"
+  }
+]
 
 
   return productData ? (
@@ -84,7 +119,63 @@ const Product = () => {
      </div>
 
      {/* ----------- Description & Review section ------------ */}
-      <div className='mt-20'>
+
+          <div className='mt-20'>
+
+  <div className='flex'>
+    <button
+      onClick={() => setActiveTab('description')}
+      className={`border border-gray-200 px-5 py-3 text-sm cursor-pointer
+      ${activeTab === 'description' ? 'font-bold bg-gray-50' : ''}`}
+    >
+      Description
+    </button>
+
+    <button
+      onClick={() => setActiveTab('reviews')}
+      className={`border border-gray-200 px-5 py-3 text-sm cursor-pointer
+      ${activeTab === 'reviews' ? 'font-bold bg-gray-50' : ''}`}
+    >
+      Reviews (122)
+    </button>
+    </div>
+    
+                      {/* Description */}
+      {activeTab === 'description' && (
+  <div className='flex flex-col gap-4 border border-gray-200 px-6 py-6 text-sm text-gray-500'>
+    <p>
+      An e-commerce website is an online platform that allows businesses to display and sell products or services over the internet. Customers can browse products, view details, add items to a cart, make secure payments, and place orders from anywhere.
+    </p>
+
+    <p>
+      One of the most important aspects of an e-commerce website is its secure payment system. Modern e-commerce platforms integrate various payment methods, such as credit cards, debit cards, digital wallets, and cash-on-delivery options.
+    </p>
+  </div>
+)} 
+    {/* Reviews */}
+     {activeTab === 'reviews' && (
+  <div className='border border-gray-200 p-4 sm:p-6'>
+
+    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
+
+                          {/*------ card -------*/}
+       {
+        reviews.map ((review,index) => (
+          <ReviewCard  key={index} review={review}/>
+        ))
+       }
+
+</div>
+</div>
+)}
+
+  </div>
+
+
+
+
+
+      {/* <div className='mt-20'>
         <div className='flex'>
           <b className='border border-gray-200 px-5 py-3 text-sm'>Description</b>
           <p className='border border-gray-200 px-5 py-3 text-sm'>Review (122)</p>
@@ -94,7 +185,7 @@ const Product = () => {
              <p>An e-commerce website is an online platform that allows businesses to display and sell products or services over the internet. Customers can browse products, view details, add items to a cart, make secure payments, and place orders from anywhere.</p>
              <p>One of the most important aspects of an e-commerce website is its secure payment system. Modern e-commerce platforms integrate various payment methods, such as credit cards, debit cards, digital wallets, and cash-on-delivery options.</p>
         </div>
-      </div>
+      </div> */}
          {/*--------------- display related products ----------------*/}
            <RelatedProducts category={productData.category} subCategory={productData.subCategory}/>
 
