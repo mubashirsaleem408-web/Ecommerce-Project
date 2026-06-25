@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { assets } from '../assets/assets'
-
+import { FaChevronLeft } from "react-icons/fa6";
+import { FaChevronRight } from "react-icons/fa6";
 
 const heroImages = [
   assets.hero_img1,
@@ -10,15 +11,18 @@ const heroImages = [
 ]
 
 function Hero() {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % heroImages.length)
-    }, 3000) 
 
-    return () => clearInterval(interval)
-  }, [])
+  const nextlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % heroImages.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => prev === 0 ? heroImages.length - 1 : prev - 1)
+  }
+
+  
 
   return (
     <div className='relative w-full h-[400px] sm:h-[500px] border border-gray-400 overflow-hidden'>
@@ -33,12 +37,22 @@ function Hero() {
           }`}
         />
       ))}
+           {/* Arrow button */}
+
+           <button onClick={prevSlide} className='absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 p-3 rounded-full backdrop-blur-sm text-white cursor-pointer'>
+            <FaChevronLeft />
+           </button>
+
+           <button onClick={nextlide} className='absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 p-3 rounded-full backdrop-blur-sm text-white cursor-pointer'>
+            <FaChevronRight />
+           </button>
+
 
       {/* Dark overlay for text readability */}
-      <div className='absolute top-0 left-0 w-full h-full bg-black/30'></div>
+      <div className='absolute top-0 left-0 w-full h-full bg-black/10'></div>
 
       {/* Content overlay */}
-      <div className='relative z-10 flex items-center justify-center sm:justify-start h-full px-6 sm:px-16'>
+      <div className='relative z-10 flex items-center justify-center sm:justify-start h-full px-6 sm:px-24'>
         <div className='text-white'>
           <div className='flex items-center gap-2'>
             <p className='w-8 md:w-11 h-[2px] bg-white'></p>
