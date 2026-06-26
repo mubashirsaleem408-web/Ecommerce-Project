@@ -54,19 +54,19 @@ const Cart = () => {
                 </div>
 
                 {/* Quantity increment decrement */}
-                <div className='flex items-center justify-between w-30 border border-gray-200'>
+                <div className='flex items-center w-20 sm:w-30 justify-between sm:justify-between  border border-gray-200'>
 
                   <button
                     onClick={() =>
                       item.quantity > 1 &&
                       updateQuantity(item._id, item.size, item.quantity - 1)
                     }
-                    className='w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 cursor-pointer'
+                    className='w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 cursor-pointer'
                   >
                     -
                   </button>
 
-                  <span className=' w-10 text-center text-xs sm:text-sm'>
+                  <span className=' w-5 sm:w-10 text-center text-xs sm:text-sm'>
                     {item.quantity}
                   </span>
 
@@ -74,7 +74,7 @@ const Cart = () => {
                     onClick={() =>
                       updateQuantity(item._id, item.size, item.quantity + 1)
                     }
-                    className='w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 cursor-pointer'
+                    className='w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 cursor-pointer'
                   >
                     +
                   </button>
