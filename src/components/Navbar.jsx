@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext,useEffect,useRef, useState } from 'react'
 import {assets} from '../assets/assets'
 import { Link, NavLink } from 'react-router-dom'
 import { CiSearch } from "react-icons/ci";
@@ -11,7 +11,28 @@ import { ShopContext } from '../context/shopContext';
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false)
-  const {setShowSearch, getCartCount} = useContext(ShopContext)
+  const [showProfile, setShowProfile] = useState(false)
+  const profileRef = useRef(null);
+  const {setShowSearch, getCartCount, navigate } = useContext(ShopContext)
+
+       //--------------- UseEffect for dropdown closed
+       useEffect(() => {
+       const handleClickOutside = (e) => {
+
+        if (
+          profileRef.current &&
+           !profileRef.current.contain(event.target))
+            {
+              setShowProfile(false);
+        }
+       };
+       document.addEventListener("click", handleClickOutside);
+
+       return () => {
+         document.removeEventListener("click", handleClickOutside);
+       };
+      },[]);
+
   return (
     <div className='flex items-center justify-between py-5 font-medium'>
         <Link to='/'><img className='w-40' src={assets.logo} alt="" /></Link>
@@ -43,13 +64,20 @@ const Navbar = () => {
           
          <CiSearch onClick={()=>setShowSearch(true)} className='text-2xl cursor-pointer' />
                              {/* for profile */}
-          <div className='group relative z-50'>
-            <Link to='/login'><CiUser className='text-2xl cursor-pointer' /></Link>
+          <div ref={profileRef} className='relative z-50'>
+            <CiUser onClick={() => setShowProfile(!showProfile)} className='text-2xl cursor-pointer' />
                       {/* for dropdown menu */}
-            <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-50 '>
+            <div className={`absolute right-0 pt-4 z-50 ${showProfile ? 'block' : 'hidden'}`}>
+
               <div className='flex flex-col gap-2 w-36 py-3 px-5 bg-slate-100 text-gray-500 rounded'>
                 <p className=' cursor-pointer hover:text-black'>My Profile</p>
-                <p className=' cursor-pointer hover:text-black'>Orders</p>
+
+                <p onClick={() => {
+                  navigate('/orders')
+                  setShowProfile(false)
+                }} className=' cursor-pointer hover:text-black'>My Orders</p>
+
+                <p className=' cursor-pointer hover:text-black'>Login</p>
                 <p className=' cursor-pointer hover:text-black'>Logout</p>
               </div>
             </div>

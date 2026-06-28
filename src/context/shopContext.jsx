@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import { products } from "../assets/assets";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useAsyncValue, useNavigate } from "react-router-dom";
+import { useLayoutEffect } from "react";
 export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
@@ -11,6 +12,7 @@ const ShopContextProvider = (props) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
+    const [orders, setOrders] = useState([]);
     const navigate = useNavigate();
 
     const addToCart = async (itemId, size) => {
@@ -76,13 +78,91 @@ const ShopContextProvider = (props) => {
     }
     return totalAmount;
    }
+                  //----------------  Cancel Order Function
+   const cancelOrder = (orderId, productId, size) => {
+
+    const updatedOrders = orders.map((order) => {
+
+        if (order.id !== orderId) {
+            return order;
+        }
+        const updatedItem = order.items.filter((item) => {
+            return !(item._id === productId && item.size === size);
+        });
+        return {
+            ...order,
+            items: updatedItem
+        };
+    });
+
+    const finalOrders = updatedOrders.filter(
+        (order) => order.items.length > 0
+    )
+    setOrders(finalOrders);
+
+    toast.success("Order cancelled sccessfully");
+   }
+
+               //    useEffect for cart load with localstorage
+
+     useEffect(() => {
+        const savedCart = localStorage.getItem("cart")
+
+        if (savedCart) {
+            setCartItems(JSON.parse(savedCart));
+        }
+     }, []);
+
+        //  for cart saved
+     useEffect(() => {
+        localStorage.setItem(
+            "cart",
+            JSON.stringify(cartItems)
+        );
+     },[cartItems]);
+
+      //    useEffect for rder load with localstorage
+
+      useEffect (() => {
+        const savedOrders = localStorage.getItem("orders");
+
+        if (savedOrders) {
+            setOrders(JSON.parse(savedOrders));
+        }
+      }, [])
+                         //  for order saved
+             
+           useEffect(() => {
+            localStorage.setItem("orders",
+                JSON.stringify(orders)
+            );
+           }, [orders])              
 
     const value = {
-        products , currency , delivery_fee,
-        search,setSearch,showSearch,setShowSearch,
-        cartItems,addToCart,
-        getCartCount,updateQuantity,
-        getCartAmount,navigate
+        products, 
+        currency, 
+        delivery_fee,
+
+        search,
+        setSearch,
+
+        showSearch,
+        setShowSearch,
+
+        cartItems,
+        setCartItems,
+        addToCart,
+
+        getCartCount,
+        updateQuantity,
+        getCartAmount,
+
+        orders,
+        setOrders,
+
+        cancelOrder,
+
+        navigate
     }
 
     return (
