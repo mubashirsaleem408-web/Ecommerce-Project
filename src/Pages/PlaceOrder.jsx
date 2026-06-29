@@ -4,6 +4,8 @@ import CartTotal from '../components/CartTotal'
 import { assets } from '../assets/assets'
 import { ShopContext } from '../context/shopContext'
 import { toast } from 'react-toastify'
+import Swal from "sweetalert2"
+import emailjs from "@emailjs/browser"
 
 
 const PlaceOrder = () => {
@@ -30,7 +32,8 @@ const PlaceOrder = () => {
     delivery_fee,
     getCartAmount,
     orders,
-    setOrders
+    setOrders,
+    currency
   } = useContext(ShopContext);
 
 const handleChange = (e) => {
@@ -48,8 +51,46 @@ const validateForm = () => {
     if(formData[key].trim() === '') {
       toast.error('please fill all the fields');
       return false;
+
     }
+
   }
+
+                 //--------- Email Validation
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!emailPattern.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      return false;
+    }
+
+                    //--------- phone Validation
+
+    const phonePattern =  /^03[0-9]{9}$/;
+
+    if (!phonePattern.test(formData.phone)) {
+      toast.error("Please enter a valid phone number");
+      return false;
+    }
+
+                    //--------- Name Validation
+      const namePattern =  /^[A-Za-z\s]+$/;
+
+      if (
+        !namePattern.test(formData.firstName) ||
+        !namePattern.test(formData.lastName)
+      ) {
+          toast.error("Name should contain only alphabets");
+          return false
+      }
+                        //--------- postalCode Validation
+        const postalCodePattern = /^[0-9]{5}$/;
+
+if (!postalCodePattern.test(formData.postalCode)) {
+  toast.error("Please enter a valid postal code");
+  return false;
+}
+
   return true;
 };
 
@@ -76,6 +117,17 @@ const handlePlaceOrder = () => {
     }
   }
 
+  const productsList = orderedProducts
+  .map(
+    (item) =>
+      `• ${item.name}
+Size: ${item.size}
+Quantity: ${item.quantity}
+Price: ${currency}${item.price}`
+  )
+  .join("\n\n");
+
+
   // -------------  Order Data(Make complete order) --------------------
   const orderData = {
     id: Date.now(),
@@ -87,12 +139,48 @@ const handlePlaceOrder = () => {
     date: new Date().toLocaleDateString()
   };
 
+  // Gmail confirmation code
+
+   const templateParams = {
+  user_name: `${formData.firstName} ${formData.lastName}`,
+  email: formData.email,
+  order_id: orderData.id,
+  payment_method: orderData.paymentMethod.toUpperCase(),
+  amount: `${currency}${orderData.amount.toFixed(2)}`,
+  products: productsList,
+};
+
+emailjs
+  .send(
+    "service_ezdu1tq",
+    "template_essq9ua",
+    templateParams,
+    "AKk1kGz6JA46fIKrb"
+  )
+  .then(() => {
+    console.log("Email sent successfully");
+  })
+  .catch((error) => {
+    console.log("Email failed:", error);
+  });
+
   setOrders([...orders, orderData]);
 
   setCartItems({});
 
-  navigate('/orders');
-
+  //------------------------- SUCCESS POPUP
+   Swal.fire({
+     title: "Order Placed!",
+  text: "Your order has been placed successfully.",
+  icon: "success",
+  confirmButtonText: "View Orders",
+  confirmButtonColor: "#000000",
+}).then((result) => {
+  if (result.isConfirmed) {
+    navigate("/orders");
+  }
+   });
+  
 };
 
 
@@ -203,13 +291,13 @@ const handlePlaceOrder = () => {
               {/*----------------------- Payment method selection ---------------------*/}
               <div className='flex flex-col gap-3 lg:flex-row'>
 
-                <div onClick={()=>setMethod('stripe')} className='flex items-center gap-3 border border-gray-200 p-2 px-3 cursor-pointer'>
-                  <p className={`min-w-3.5 h-3.5 border border-gray-300 rounded-full ${method === 'stripe' ? 'bg-green-500' : ''}`}></p>
+                <div onClick={()=>setMethod('jazzcash')} className='flex items-center gap-3 border border-gray-200 p-2 px-3 cursor-pointer'>
+                  <p className={`min-w-3.5 h-3.5 border border-gray-300 rounded-full ${method === 'jazzcash' ? 'bg-green-500' : ''}`}></p>
                   <img className='h-10 mx-4' src={assets.jazzcash_logo} alt="" />
                 </div>
 
-                <div onClick={()=>setMethod('razorpay')} className='flex items-center gap-3 border border-gray-200 p-2 px-3 cursor-pointer'>
-                  <p className={`min-w-3.5 h-3.5 border border-gray-300 rounded-full ${method === 'razorpay' ? 'bg-green-500' : ''}`}></p>
+                <div onClick={()=>setMethod('easypaisa')} className='flex items-center gap-3 border border-gray-200 p-2 px-3 cursor-pointer'>
+                  <p className={`min-w-3.5 h-3.5 border border-gray-300 rounded-full ${method === 'easypaisa' ? 'bg-green-500' : ''}`}></p>
                   <img className='h-10 mx-4' src={assets.easypaisa_logo} alt="" />
                 </div>
                 
