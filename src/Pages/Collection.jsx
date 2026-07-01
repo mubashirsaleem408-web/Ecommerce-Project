@@ -6,6 +6,7 @@ import ProductItem from '../components/ProductItem';
 
 const Collection = () => {
   const { products ,search , showSearch} = useContext(ShopContext);
+  
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -80,6 +81,7 @@ const Collection = () => {
  useEffect(() => {
   setVisibleProducts(12);
  }, [category, setCategory, search, showSearch])
+
 
   return (
     <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t border-gray-200'>

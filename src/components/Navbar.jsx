@@ -21,7 +21,7 @@ const Navbar = () => {
 
         if (
           profileRef.current &&
-           !profileRef.current.contains(event.target))
+           !profileRef.current.contains(e.target))
             {
               setShowProfile(false);
         }

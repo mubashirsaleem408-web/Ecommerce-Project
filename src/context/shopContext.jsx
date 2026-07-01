@@ -1,10 +1,9 @@
-import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore"
+
 
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useAsyncValue, useNavigate } from "react-router-dom";
-import { useLayoutEffect } from "react";
+import { products as productsData } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
@@ -16,7 +15,7 @@ const ShopContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
     const [orders, setOrders] = useState([]);
 
-    const [products, setProducts] = useState([])
+    const [products] = useState(productsData);
 
     const navigate = useNavigate();
 
@@ -108,28 +107,6 @@ const ShopContextProvider = (props) => {
         toast.success("Order cancelled sccessfully");
     }
 
-    //------------------Products fetch using firebase
-
-    const fetchProducts = async () => {
-        try {
-            const querySnapshot = await getDocs(collection(db, "products"));
-
-            const productsData = querySnapshot.docs.map((doc) => {
-                const data = doc.data();
-
-                console.log("Image Field:", data.image); // 👈 Ye line add karo
-
-                return data;
-            });
-
-            setProducts(productsData);
-
-            console.log("Products Loaded:", productsData);
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
 
 
@@ -137,10 +114,6 @@ const ShopContextProvider = (props) => {
 
 
 
-    //    useEffect for fetch Products with firebase
-    useEffect(() => {
-        fetchProducts();
-    }, []);
     //    useEffect for cart load with localstorage
 
     useEffect(() => {
