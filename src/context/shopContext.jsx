@@ -114,7 +114,13 @@ const ShopContextProvider = (props) => {
         try {
             const querySnapshot = await getDocs(collection(db, "products"));
 
-            const productsData = querySnapshot.docs.map((doc) => doc.data());
+            const productsData = querySnapshot.docs.map((doc) => {
+                const data = doc.data();
+
+                console.log("Image Field:", data.image); // 👈 Ye line add karo
+
+                return data;
+            });
 
             setProducts(productsData);
 
