@@ -1,5 +1,7 @@
+import { db } from "../firebase";
+import { collection, getDocs } from "firebase/firestore"
+
 import { createContext, useEffect, useState } from "react";
-import { products } from "../assets/assets";
 import { toast } from "react-toastify";
 import { useAsyncValue, useNavigate } from "react-router-dom";
 import { useLayoutEffect } from "react";
@@ -13,134 +15,164 @@ const ShopContextProvider = (props) => {
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [orders, setOrders] = useState([]);
+
+    const [products, setProducts] = useState([])
+
     const navigate = useNavigate();
 
     const addToCart = async (itemId, size) => {
-            if (!size) {
-                toast.error("Please Select Product Size")
-                return;
-            }
+        if (!size) {
+            toast.error("Please Select Product Size")
+            return;
+        }
 
-          let cartData = structuredClone(cartItems)
+        let cartData = structuredClone(cartItems)
 
-          if (cartData[itemId]) {
-            if(cartData[itemId][size]) {
+        if (cartData[itemId]) {
+            if (cartData[itemId][size]) {
                 cartData[itemId][size] += 1;
             }
             else {
                 cartData[itemId][size] = 1
             }
-          }
-          else {
+        }
+        else {
             cartData[itemId] = {}
             cartData[itemId][size] = 1
-          }
-          setCartItems(cartData);
+        }
+        setCartItems(cartData);
     }
 
-   const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-        for(const item in cartItems[items]) {
-            try {
-                if (cartItems[items][item] > 0) {
-                    totalCount += cartItems[items][item];
+    const getCartCount = () => {
+        let totalCount = 0;
+        for (const items in cartItems) {
+            for (const item in cartItems[items]) {
+                try {
+                    if (cartItems[items][item] > 0) {
+                        totalCount += cartItems[items][item];
+                    }
+                } catch (error) {
+
                 }
-            } catch (error) {
-                
             }
         }
+        return totalCount;
     }
-    return totalCount;
-   }
 
-   const updateQuantity = async (itemId, size,quantity) => {
+    const updateQuantity = async (itemId, size, quantity) => {
 
-    let cartData = structuredClone(cartItems);
+        let cartData = structuredClone(cartItems);
 
-    cartData[itemId][size] = quantity;
-    setCartItems(cartData);
-   }
+        cartData[itemId][size] = quantity;
+        setCartItems(cartData);
+    }
 
-   const getCartAmount =  () => {
-    let totalAmount = 0;
-    for (const items in cartItems) {
-        let itemInfo = products.find((product)=> product._id ===items);
-        for(const item in cartItems[items]) {
-            try {
-                if (cartItems[items][item] > 0) {
-                    totalAmount += itemInfo.price * cartItems[items][item];
+    const getCartAmount = () => {
+        let totalAmount = 0;
+        for (const items in cartItems) {
+            let itemInfo = products.find((product) => product._id === items);
+            for (const item in cartItems[items]) {
+                try {
+                    if (cartItems[items][item] > 0) {
+                        totalAmount += itemInfo.price * cartItems[items][item];
+                    }
+                } catch (error) {
+
                 }
-            } catch (error) {
-                
             }
         }
+        return totalAmount;
     }
-    return totalAmount;
-   }
-                  //----------------  Cancel Order Function
-   const cancelOrder = (orderId, productId, size) => {
+    //----------------  Cancel Order Function
+    const cancelOrder = (orderId, productId, size) => {
 
-    const updatedOrders = orders.map((order) => {
+        const updatedOrders = orders.map((order) => {
 
-        if (order.id !== orderId) {
-            return order;
-        }
-        const updatedItem = order.items.filter((item) => {
-            return !(item._id === productId && item.size === size);
+            if (order.id !== orderId) {
+                return order;
+            }
+            const updatedItem = order.items.filter((item) => {
+                return !(item._id === productId && item.size === size);
+            });
+            return {
+                ...order,
+                items: updatedItem
+            };
         });
-        return {
-            ...order,
-            items: updatedItem
-        };
-    });
 
-    const finalOrders = updatedOrders.filter(
-        (order) => order.items.length > 0
-    )
-    setOrders(finalOrders);
+        const finalOrders = updatedOrders.filter(
+            (order) => order.items.length > 0
+        )
+        setOrders(finalOrders);
 
-    toast.success("Order cancelled sccessfully");
-   }
+        toast.success("Order cancelled sccessfully");
+    }
 
-               //    useEffect for cart load with localstorage
+    //------------------Products fetch using firebase
 
-     useEffect(() => {
+    const fetchProducts = async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, "products"));
+
+            const productsData = querySnapshot.docs.map((doc) => doc.data());
+
+            setProducts(productsData);
+
+            console.log("Products Loaded:", productsData);
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+
+
+
+
+
+
+    //    useEffect for fetch Products with firebase
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+    //    useEffect for cart load with localstorage
+
+    useEffect(() => {
         const savedCart = localStorage.getItem("cart")
 
         if (savedCart) {
             setCartItems(JSON.parse(savedCart));
         }
-     }, []);
+    }, []);
 
-        //  for cart saved
-     useEffect(() => {
+    //  for cart saved
+    useEffect(() => {
         localStorage.setItem(
             "cart",
             JSON.stringify(cartItems)
         );
-     },[cartItems]);
+    }, [cartItems]);
 
-      //    useEffect for rder load with localstorage
+    //    useEffect for rder load with localstorage
 
-      useEffect (() => {
+    useEffect(() => {
         const savedOrders = localStorage.getItem("orders");
 
         if (savedOrders) {
             setOrders(JSON.parse(savedOrders));
         }
-      }, [])
-                         //  for order saved
-             
-           useEffect(() => {
-            localStorage.setItem("orders",
-                JSON.stringify(orders)
-            );
-           }, [orders])              
+    }, [])
+    //  for order saved
+
+    useEffect(() => {
+        localStorage.setItem("orders",
+            JSON.stringify(orders)
+        );
+    }, [orders])
 
     const value = {
-        products, 
-        currency, 
+        products,
+        currency,
         delivery_fee,
 
         search,
@@ -166,7 +198,7 @@ const ShopContextProvider = (props) => {
     }
 
     return (
-        <ShopContext.Provider value = {value}>
+        <ShopContext.Provider value={value}>
             {props.children}
         </ShopContext.Provider>
     )
